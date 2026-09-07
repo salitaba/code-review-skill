@@ -1,6 +1,18 @@
 # Code Review Agent Skill
 
+[![skills.sh](https://skills.sh/b/salitaba/code-review-skill)](https://skills.sh/salitaba/code-review-skill)
+
 A living, evidence-driven skill for high-signal code review.
+
+## Install
+
+Install directly with the skills CLI:
+
+```bash
+npx skills add https://github.com/salitaba/code-review-skill --skill code-review
+```
+
+After installation, the skill is available to supported coding agents through the standard Agent Skills workflow. skills.sh indexes GitHub-hosted skills automatically when they are discovered/installed.
 
 ## Goal
 
@@ -20,4 +32,4 @@ The skill is evolved iteratively. Improvements must be justified by a concrete b
 
 ## Current improvement
 
-The latest iteration adds risk-based triage and an evidence ladder so the reviewer spends deep effort on trust, state, ownership, compatibility, and failure boundaries, while downgrading weakly evidenced concerns to focused questions instead of overstated blockers.
+The latest iteration adds rollout/migration safety, before-versus-after behavior comparison, and a stronger evidence ladder so the reviewer spends deep effort on trust, state, ownership, compatibility, and failure boundaries, while downgrading weakly evidenced concerns to focused questions instead of overstated blockers.
