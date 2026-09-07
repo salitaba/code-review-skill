@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.1.0
+version: 0.2.0
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -23,27 +23,34 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 1. Establish intent and acceptance criteria.
    - Read the PR description, issue, tests, API/schema changes, and relevant surrounding code.
    - If intent is unavailable, state the assumption that constrains the review.
-2. Map the change.
+2. Build a change map.
    - Identify changed components, callers, dependencies, data flows, state transitions, and boundaries.
    - Follow important inputs to side effects and outputs to consumers.
-3. Check correctness and invariants.
+3. Compare old versus new behavior.
+   - For each meaningful branch, default, error path, and state transition, ask what was true before, what is true now, and whether the difference is intentional.
+   - Treat deletions, default changes, reordered operations, and narrowed conditions as first-class behavior changes.
+4. Check correctness and invariants.
    - Normal path, boundary values, empty/null/error cases, retries, partial failure, ordering, idempotency, and state transitions.
    - Look for violated preconditions/postconditions and duplicated or conflicting business rules.
-4. Check concurrency and lifecycle.
+5. Check concurrency and lifecycle.
    - Shared mutable state, races, lost updates, locking, transaction scope, isolation, async execution, duplicate delivery, retries, timeouts, cancellation, TTL/lease expiry, and resource ownership.
-5. Check contracts and integration boundaries.
+6. Check contracts and integration boundaries.
    - API compatibility, serialization, schema evolution, event contracts, versioning, authentication/authorization, tenant isolation, and backward/forward compatibility.
-6. Check architecture and abstraction boundaries.
+7. Check rollout, migration, and recovery safety.
+   - Consider mixed-version deployments, feature flags, retries during rollout, backward-compatible database changes, expand/contract sequencing, rollback feasibility, and recovery after partial deployment.
+   - A change is not operationally safe merely because the steady-state code path is correct.
+8. Check architecture and abstraction boundaries.
    - Dependency direction, ownership, coupling, hidden policy, lifecycle leakage, duplicated orchestration, and abstractions that permit type-correct but semantically invalid use.
-7. Check security, performance, and operability when relevant.
+9. Check security, performance, and operability when relevant.
    - Trust boundaries, input handling, secrets, privilege, injection, denial-of-service risks, query amplification, hot paths, resource growth, metrics/logging/tracing, recovery, and alertability.
-8. Check tests.
+10. Check tests.
    - Prefer tests that prove observable behavior and invariants.
-   - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, and assertions that merely verify mocks/interactions.
-9. Validate findings.
+   - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, and assertions that merely verify mocks/interactions.
+11. Validate findings.
    - For every candidate issue, identify the smallest trigger and trace the affected behavior.
    - Try to falsify it with a concrete counterexample.
-10. Self-critique and stop.
+   - Prefer a reproducer, failing test, executable query, or precise code-path proof over intuition.
+12. Self-critique and stop.
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
@@ -62,15 +69,24 @@ Each substantive finding should contain:
 - **Fix**: smallest safe correction or concrete investigation
 - **Regression test**: the smallest test that would prevent recurrence
 
+### Evidence ladder
+
+Prefer the strongest available evidence:
+
+1. Reproduced failure, failing test, or deterministic command output.
+2. Code-proven behavior with a complete path from trigger to consequence.
+3. Strong indication supported by surrounding code, contract, or invariant.
+4. Focused question when the concern depends on missing context.
+
 Never use high-severity wording for a low-confidence observation. If evidence is insufficient, ask a focused question or omit the finding.
 
 ## Severity guidance
 
 ### Blocker
-Likely to cause severe correctness, security, data-integrity, concurrency, reliability, contract, or critical product failure. Requires resolution before approval.
+Likely to cause severe correctness, security, data-integrity, concurrency, reliability, contract, rollout, or critical product failure. Requires resolution before approval.
 
 ### Major
-Meaningful defect or architectural risk with a realistic trigger and material impact. Usually should be fixed before merge.
+Meaningful defect or architectural/operational risk with a realistic trigger and material impact. Usually should be fixed before merge.
 
 ### Minor
 Real but bounded issue with limited impact or a meaningful maintainability/testability concern.
@@ -105,6 +121,18 @@ For each major candidate finding ask:
 
 If the fifth question has an obvious answer and that evidence is present, do not report the finding.
 
+## Rollout and migration heuristics
+
+Pay special attention when a change affects persisted data, public contracts, or distributed deployment:
+
+- Can old and new versions read/write the same data safely during rollout?
+- Does a new writer require an old reader to understand a field, enum, event, or status?
+- Is the database migration additive before code depends on it?
+- Can rollback restore code without corrupting data or making old code crash?
+- Are retries, duplicate deliveries, and partially completed migrations safe?
+- Is a feature flag actually isolating risk, or only hiding the UI while backend behavior changes globally?
+- Are observability and recovery signals present before enabling the risky path?
+
 ## Common high-value checks
 
 ### Correctness
@@ -114,6 +142,7 @@ If the fifth question has an obvious answer and that evidence is present, do not
 - stale reads and lost updates
 - partial success treated as full success
 - error paths that accidentally commit, acknowledge, or discard work
+- deletion or default changes that silently alter existing behavior
 
 ### Concurrency
 - check-then-act races
@@ -155,7 +184,7 @@ If the fifth question has an obvious answer and that evidence is present, do not
 - assertions that prove mocks rather than outcomes
 - tests coupled to implementation details
 - missing regression test for the actual invariant
-- missing concurrency/retry/contract/migration tests where those are the risk
+- missing concurrency/retry/contract/migration/rollback tests where those are the risk
 
 ## AI-generated-code checks
 
@@ -190,6 +219,7 @@ Finish with:
 
 - overall risk assessment
 - important areas reviewed with no material issue found, when useful
+- rollout/migration assumptions or required deployment sequencing, when relevant
 - required changes before approval
 - optional improvements only if they are genuinely valuable
 
