@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.2.0
+version: 0.3.0
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -26,31 +26,40 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 2. Build a change map.
    - Identify changed components, callers, dependencies, data flows, state transitions, and boundaries.
    - Follow important inputs to side effects and outputs to consumers.
-3. Compare old versus new behavior.
+3. Build an invariant ledger.
+   - Write down the key preconditions, postconditions, ownership rules, uniqueness constraints, authorization rules, and state-transition rules that must remain true.
+   - For each changed path, mark which invariant it establishes, preserves, weakens, or silently bypasses.
+   - Treat an invariant that exists only in comments or caller discipline as a review risk.
+4. Compare old versus new behavior.
    - For each meaningful branch, default, error path, and state transition, ask what was true before, what is true now, and whether the difference is intentional.
    - Treat deletions, default changes, reordered operations, and narrowed conditions as first-class behavior changes.
-4. Check correctness and invariants.
+5. Check correctness and invariants.
    - Normal path, boundary values, empty/null/error cases, retries, partial failure, ordering, idempotency, and state transitions.
    - Look for violated preconditions/postconditions and duplicated or conflicting business rules.
-5. Check concurrency and lifecycle.
+   - Test the smallest counterexample at each changed boundary instead of relying on the happy path.
+6. Check concurrency and lifecycle.
    - Shared mutable state, races, lost updates, locking, transaction scope, isolation, async execution, duplicate delivery, retries, timeouts, cancellation, TTL/lease expiry, and resource ownership.
-6. Check contracts and integration boundaries.
+   - Ask whether a second actor, delayed message, retry, timeout, or restart can interleave between the check and the side effect.
+7. Check contracts and integration boundaries.
    - API compatibility, serialization, schema evolution, event contracts, versioning, authentication/authorization, tenant isolation, and backward/forward compatibility.
-7. Check rollout, migration, and recovery safety.
+   - Inspect both producers and consumers; a locally valid change can still violate a downstream assumption.
+8. Check rollout, migration, and recovery safety.
    - Consider mixed-version deployments, feature flags, retries during rollout, backward-compatible database changes, expand/contract sequencing, rollback feasibility, and recovery after partial deployment.
    - A change is not operationally safe merely because the steady-state code path is correct.
-8. Check architecture and abstraction boundaries.
+9. Check architecture and abstraction boundaries.
    - Dependency direction, ownership, coupling, hidden policy, lifecycle leakage, duplicated orchestration, and abstractions that permit type-correct but semantically invalid use.
-9. Check security, performance, and operability when relevant.
+10. Check security, performance, and operability when relevant.
    - Trust boundaries, input handling, secrets, privilege, injection, denial-of-service risks, query amplification, hot paths, resource growth, metrics/logging/tracing, recovery, and alertability.
-10. Check tests.
+   - Verify that important failures remain distinguishable in telemetry; collapsed errors can make a defect operationally invisible.
+11. Check tests.
    - Prefer tests that prove observable behavior and invariants.
    - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, and assertions that merely verify mocks/interactions.
-11. Validate findings.
+   - Confirm new tests would fail on the suspected regression; a test that passes both before and after the change is not a regression test.
+12. Validate findings.
    - For every candidate issue, identify the smallest trigger and trace the affected behavior.
    - Try to falsify it with a concrete counterexample.
    - Prefer a reproducer, failing test, executable query, or precise code-path proof over intuition.
-12. Self-critique and stop.
+13. Self-critique and stop.
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
@@ -143,6 +152,8 @@ Pay special attention when a change affects persisted data, public contracts, or
 - partial success treated as full success
 - error paths that accidentally commit, acknowledge, or discard work
 - deletion or default changes that silently alter existing behavior
+- invariants enforced in one path but bypassed in another
+- tests that do not distinguish the old bug from the fixed behavior
 
 ### Concurrency
 - check-then-act races
@@ -152,6 +163,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - idempotency assumptions not enforced at the source of truth
 - TTL/lease expiry during work
 - async work outliving request/transaction context
+- restart/recovery paths that replay or lose in-flight work
 
 ### API/contracts
 - breaking changes hidden behind compatible types
@@ -160,6 +172,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - serialization/nullability changes
 - event/schema compatibility
 - authentication/authorization behavior changes
+- downstream consumers that infer meaning from ordering, omission, or error codes
 
 ### Security
 - trust-boundary changes
@@ -169,6 +182,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - secret exposure
 - sensitive data in logs/errors
 - resource-exhaustion paths
+- fail-open behavior after timeout, cache miss, or dependency failure
 
 ### Performance/reliability
 - N+1 and accidental fan-out
@@ -178,6 +192,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - missing timeouts/cancellation
 - synchronous dependencies on failure-critical paths
 - observability gaps that make failures unrecoverable
+- error collapsing that prevents safe retry, alerting, or diagnosis
 
 ### Testing
 - happy-path-only coverage
@@ -185,6 +200,8 @@ Pay special attention when a change affects persisted data, public contracts, or
 - tests coupled to implementation details
 - missing regression test for the actual invariant
 - missing concurrency/retry/contract/migration/rollback tests where those are the risk
+- fixtures that omit the boundary condition needed to trigger the bug
+- tests that cannot fail independently when the behavior regresses
 
 ## AI-generated-code checks
 
