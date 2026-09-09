@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.4.0 — 2026-09-09
+
+Focused improvement: make review depth proportional to blast radius and make removed safeguards visible during diff review.
+
+Added:
+- a pre-review risk map using reach and failure cost to prioritize deep analysis
+- explicit guidance that small changes in high-reach surfaces can outrank large local refactors
+- a negative-space pass for deleted validation, authorization, tests, telemetry, limits, cleanup, retries, and rollback hooks
+- stronger review of safeguard equivalence when protections move rather than disappear
+
+Kept:
+- invariant-ledger reasoning
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.3.0 — 2026-09-08
 
 Focused improvement: make reviewers reason from explicit invariants and prove that tests would catch the suspected regression.
