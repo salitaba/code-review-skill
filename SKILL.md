@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.3.0
+version: 0.4.0
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -26,40 +26,47 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 2. Build a change map.
    - Identify changed components, callers, dependencies, data flows, state transitions, and boundaries.
    - Follow important inputs to side effects and outputs to consumers.
-3. Build an invariant ledger.
+3. Build a risk map before deep reading.
+   - Mark each changed surface by **reach** (local, service-wide, cross-service, user-visible, data-wide) and **failure cost** (recoverable, disruptive, irreversible).
+   - Spend the deepest review effort on high-reach or hard-to-recover changes: auth, money/entitlements, persistence, migrations, queues, caches, public contracts, CI/deploy, and shared libraries.
+   - Treat a small diff in a high-reach surface as higher risk than a large mechanical diff in a local surface.
+4. Build an invariant ledger.
    - Write down the key preconditions, postconditions, ownership rules, uniqueness constraints, authorization rules, and state-transition rules that must remain true.
    - For each changed path, mark which invariant it establishes, preserves, weakens, or silently bypasses.
    - Treat an invariant that exists only in comments or caller discipline as a review risk.
-4. Compare old versus new behavior.
+5. Compare old versus new behavior.
    - For each meaningful branch, default, error path, and state transition, ask what was true before, what is true now, and whether the difference is intentional.
    - Treat deletions, default changes, reordered operations, and narrowed conditions as first-class behavior changes.
-5. Check correctness and invariants.
+6. Check correctness and invariants.
    - Normal path, boundary values, empty/null/error cases, retries, partial failure, ordering, idempotency, and state transitions.
    - Look for violated preconditions/postconditions and duplicated or conflicting business rules.
    - Test the smallest counterexample at each changed boundary instead of relying on the happy path.
-6. Check concurrency and lifecycle.
+7. Check concurrency and lifecycle.
    - Shared mutable state, races, lost updates, locking, transaction scope, isolation, async execution, duplicate delivery, retries, timeouts, cancellation, TTL/lease expiry, and resource ownership.
    - Ask whether a second actor, delayed message, retry, timeout, or restart can interleave between the check and the side effect.
-7. Check contracts and integration boundaries.
+8. Check contracts and integration boundaries.
    - API compatibility, serialization, schema evolution, event contracts, versioning, authentication/authorization, tenant isolation, and backward/forward compatibility.
    - Inspect both producers and consumers; a locally valid change can still violate a downstream assumption.
-8. Check rollout, migration, and recovery safety.
+9. Check rollout, migration, and recovery safety.
    - Consider mixed-version deployments, feature flags, retries during rollout, backward-compatible database changes, expand/contract sequencing, rollback feasibility, and recovery after partial deployment.
    - A change is not operationally safe merely because the steady-state code path is correct.
-9. Check architecture and abstraction boundaries.
+10. Check architecture and abstraction boundaries.
    - Dependency direction, ownership, coupling, hidden policy, lifecycle leakage, duplicated orchestration, and abstractions that permit type-correct but semantically invalid use.
-10. Check security, performance, and operability when relevant.
+11. Check security, performance, and operability when relevant.
    - Trust boundaries, input handling, secrets, privilege, injection, denial-of-service risks, query amplification, hot paths, resource growth, metrics/logging/tracing, recovery, and alertability.
    - Verify that important failures remain distinguishable in telemetry; collapsed errors can make a defect operationally invisible.
-11. Check tests.
+12. Check negative space and deleted safeguards.
+   - Inspect removed validation, authorization, rate limits, tests, metrics, alerts, timeouts, cleanup, retries, and rollback hooks.
+   - Ask what protection used to exist, where it moved, and whether the new path still has equivalent coverage.
+13. Check tests.
    - Prefer tests that prove observable behavior and invariants.
    - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, and assertions that merely verify mocks/interactions.
    - Confirm new tests would fail on the suspected regression; a test that passes both before and after the change is not a regression test.
-12. Validate findings.
+14. Validate findings.
    - For every candidate issue, identify the smallest trigger and trace the affected behavior.
    - Try to falsify it with a concrete counterexample.
    - Prefer a reproducer, failing test, executable query, or precise code-path proof over intuition.
-13. Self-critique and stop.
+15. Self-critique and stop.
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
