@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.5.0 — 2026-09-10
+
+Focused improvement: make review conclusions explicit, falsifiable, and proportional to the evidence and scope actually covered.
+
+Added:
+- `references/review-decision-record.md`
+- explicit decision states: approve, request changes, needs context, and limited review
+- changed-behavior summary requirements for the final decision
+- verification status for high-risk assumptions: verified, inferred, or unknown
+- residual-risk and review-limit recording for approvals and no-material-issue conclusions
+- approval-quality checks covering scope, negative paths, deleted safeguards, regression-test strength, and unresolved assumptions
+
+Why:
+- Previous versions were strong at candidate-finding and falsification, but could still produce an overconfident “LGTM” when the review scope or assumptions were incomplete.
+- The new framework improves decision quality without adding another broad checklist to the main skill.
+
+Kept:
+- risk-based review depth
+- invariant-ledger reasoning
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.4.0 — 2026-09-09
 
 Focused improvement: make review depth proportional to blast radius and make removed safeguards visible during diff review.
