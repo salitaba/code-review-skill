@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.4.0
+version: 0.5.1
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -70,6 +70,9 @@ A change can alter behavior through callers, downstream consumers, transaction/r
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
+16. Record the review decision.
+   - Before producing the final review, use `references/review-decision-record.md` to make the decision boundary, high-risk assumptions, evidence, residual risk, and review limits explicit.
+   - Do not use `approve` as a synonym for “the diff looks reasonable”; use it only when the reviewed scope and evidence support that conclusion.
 
 ## Finding standard
 
@@ -246,5 +249,7 @@ Finish with:
 - rollout/migration assumptions or required deployment sequencing, when relevant
 - required changes before approval
 - optional improvements only if they are genuinely valuable
+- an explicit decision: approve, request changes, needs context, or limited review
+- residual risk and review limits when the decision is approve or limited review
 
 Do not report style preferences unless they encode a real correctness, maintainability, or consistency risk.
