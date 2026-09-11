@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.5.1 — 2026-09-11
+
+Focused improvement: close an integration gap in the previous evolution and make the final review decision part of the mandatory agent workflow.
+
+Fixed:
+- synchronized the `SKILL.md` version with the latest documented evolution
+- connected `references/review-decision-record.md` to the main review workflow instead of leaving it as an optional standalone reference
+- required explicit decision, residual-risk, and review-limit output when concluding a review
+
+Why:
+- Version 0.5.0 documented a decision-record framework, but the agent-facing skill still declared version 0.4.0 and did not explicitly require using the new reference.
+- This created a real maintenance and behavior gap: the repository could claim stronger approval discipline than the skill would consistently apply.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.5.0 — 2026-09-10
 
 Focused improvement: make review conclusions explicit, falsifiable, and proportional to the evidence and scope actually covered.
@@ -100,3 +127,4 @@ Initial principles:
 - correctness, concurrency, contracts, security, performance, testing, architecture, and domain risk
 - counterexample/falsification before reporting major findings
 - regression-test guidance for findings
+- self-critique and stopping rule
