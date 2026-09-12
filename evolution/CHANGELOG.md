@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.6.0 — 2026-09-12
+
+Focused improvement: make configuration-, feature-flag-, role-, tenant-, version-, and deployment-dependent behavior explicit during review.
+
+Added:
+- a mode-and-configuration matrix step before deep reading
+- pairwise/risk-based guidance instead of blind Cartesian-product testing
+- checks for missing, invalid, stale, or default configuration values
+- explicit review of semantic changes that appear only in non-default modes
+- rollout-risk checks for flags/configuration that change backend behavior without telemetry, rollback, or migration handling
+- test guidance for high-risk matrix cells rather than default-only coverage
+
+Why:
+- Previous versions were strong on invariants, deleted safeguards, rollout safety, and decision quality, but could still miss bugs that occur only for a non-default flag, role, tenant, API version, or mixed deployment.
+- This is a common source of authorization, compatibility, pricing/entitlement, routing, and data-interpretation defects.
+- The new step improves coverage of interaction risks without requiring exhaustive testing of every possible configuration combination.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.5.1 — 2026-09-11
 
 Focused improvement: close an integration gap in the previous evolution and make the final review decision part of the mandatory agent workflow.
