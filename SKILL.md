@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.5.1
+version: 0.6.0
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -34,43 +34,50 @@ A change can alter behavior through callers, downstream consumers, transaction/r
    - Write down the key preconditions, postconditions, ownership rules, uniqueness constraints, authorization rules, and state-transition rules that must remain true.
    - For each changed path, mark which invariant it establishes, preserves, weakens, or silently bypasses.
    - Treat an invariant that exists only in comments or caller discipline as a review risk.
-5. Compare old versus new behavior.
+5. Build a mode-and-configuration matrix when behavior depends on flags, versions, tenants, roles, regions, or deployment state.
+   - Enumerate the meaningful combinations of feature flags, config values, API versions, caller roles, tenant states, and mixed old/new deployments.
+   - Focus on boundary combinations that change authorization, persistence, pricing/entitlement, retries, routing, or data interpretation.
+   - Check whether defaults, missing values, invalid values, and stale cached configuration produce a distinct and safe behavior.
+   - Do not test every Cartesian-product combination blindly; choose pairwise or risk-based combinations that cover each changed branch and each high-impact interaction.
+   - Treat a flag or config that changes semantics without corresponding telemetry, rollback, or migration handling as a rollout risk.
+6. Compare old versus new behavior.
    - For each meaningful branch, default, error path, and state transition, ask what was true before, what is true now, and whether the difference is intentional.
    - Treat deletions, default changes, reordered operations, and narrowed conditions as first-class behavior changes.
-6. Check correctness and invariants.
+7. Check correctness and invariants.
    - Normal path, boundary values, empty/null/error cases, retries, partial failure, ordering, idempotency, and state transitions.
    - Look for violated preconditions/postconditions and duplicated or conflicting business rules.
    - Test the smallest counterexample at each changed boundary instead of relying on the happy path.
-7. Check concurrency and lifecycle.
+8. Check concurrency and lifecycle.
    - Shared mutable state, races, lost updates, locking, transaction scope, isolation, async execution, duplicate delivery, retries, timeouts, cancellation, TTL/lease expiry, and resource ownership.
    - Ask whether a second actor, delayed message, retry, timeout, or restart can interleave between the check and the side effect.
-8. Check contracts and integration boundaries.
+9. Check contracts and integration boundaries.
    - API compatibility, serialization, schema evolution, event contracts, versioning, authentication/authorization, tenant isolation, and backward/forward compatibility.
    - Inspect both producers and consumers; a locally valid change can still violate a downstream assumption.
-9. Check rollout, migration, and recovery safety.
+10. Check rollout, migration, and recovery safety.
    - Consider mixed-version deployments, feature flags, retries during rollout, backward-compatible database changes, expand/contract sequencing, rollback feasibility, and recovery after partial deployment.
    - A change is not operationally safe merely because the steady-state code path is correct.
-10. Check architecture and abstraction boundaries.
+11. Check architecture and abstraction boundaries.
    - Dependency direction, ownership, coupling, hidden policy, lifecycle leakage, duplicated orchestration, and abstractions that permit type-correct but semantically invalid use.
-11. Check security, performance, and operability when relevant.
+12. Check security, performance, and operability when relevant.
    - Trust boundaries, input handling, secrets, privilege, injection, denial-of-service risks, query amplification, hot paths, resource growth, metrics/logging/tracing, recovery, and alertability.
    - Verify that important failures remain distinguishable in telemetry; collapsed errors can make a defect operationally invisible.
-12. Check negative space and deleted safeguards.
+13. Check negative space and deleted safeguards.
    - Inspect removed validation, authorization, rate limits, tests, metrics, alerts, timeouts, cleanup, retries, and rollback hooks.
    - Ask what protection used to exist, where it moved, and whether the new path still has equivalent coverage.
-13. Check tests.
+14. Check tests.
    - Prefer tests that prove observable behavior and invariants.
    - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, and assertions that merely verify mocks/interactions.
    - Confirm new tests would fail on the suspected regression; a test that passes both before and after the change is not a regression test.
-14. Validate findings.
+   - For flag/config-heavy changes, ensure tests cover the high-risk matrix cells rather than only the default configuration.
+15. Validate findings.
    - For every candidate issue, identify the smallest trigger and trace the affected behavior.
    - Try to falsify it with a concrete counterexample.
    - Prefer a reproducer, failing test, executable query, or precise code-path proof over intuition.
-15. Self-critique and stop.
+16. Self-critique and stop.
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
-16. Record the review decision.
+17. Record the review decision.
    - Before producing the final review, use `references/review-decision-record.md` to make the decision boundary, high-risk assumptions, evidence, residual risk, and review limits explicit.
    - Do not use `approve` as a synonym for “the diff looks reasonable”; use it only when the reviewed scope and evidence support that conclusion.
 
@@ -164,6 +171,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - deletion or default changes that silently alter existing behavior
 - invariants enforced in one path but bypassed in another
 - tests that do not distinguish the old bug from the fixed behavior
+- semantic changes that occur only for non-default flags, roles, tenants, or versions
 
 ### Concurrency
 - check-then-act races
@@ -183,6 +191,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - event/schema compatibility
 - authentication/authorization behavior changes
 - downstream consumers that infer meaning from ordering, omission, or error codes
+- version/flag combinations that make the same payload mean different things
 
 ### Security
 - trust-boundary changes
@@ -193,6 +202,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - sensitive data in logs/errors
 - resource-exhaustion paths
 - fail-open behavior after timeout, cache miss, or dependency failure
+- feature/config paths that bypass controls only for specific roles, tenants, or rollout cohorts
 
 ### Performance/reliability
 - N+1 and accidental fan-out
@@ -203,6 +213,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - synchronous dependencies on failure-critical paths
 - observability gaps that make failures unrecoverable
 - error collapsing that prevents safe retry, alerting, or diagnosis
+- configuration or rollout combinations that multiply load unexpectedly
 
 ### Testing
 - happy-path-only coverage
@@ -212,6 +223,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - missing concurrency/retry/contract/migration/rollback tests where those are the risk
 - fixtures that omit the boundary condition needed to trigger the bug
 - tests that cannot fail independently when the behavior regresses
+- default-only tests for non-default flags, versions, roles, or tenant states
 
 ## AI-generated-code checks
 
