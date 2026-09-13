@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.7.0 — 2026-09-13
+
+Focused improvement: make dependency, build, CI/CD, packaging, container, infrastructure, and release changes first-class review surfaces.
+
+Added:
+- `references/dependency-and-delivery-review.md`
+- provenance and pinning checks for packages, actions, images, plugins, and registries
+- effective dependency-graph and environment-parity checks
+- CI/CD permission, secret, runner, network, and untrusted-input review
+- reproducibility, artifact identity, rollback, and partial-delivery checks
+- targeted regression coverage for build, startup, compatibility, and release risks
+
+Why:
+- Previous versions prioritized application behavior, configuration matrices, rollout safety, and final decision quality, but treated the delivery chain mostly as a generic CI/deploy concern.
+- Small dependency or workflow edits can change the artifact that ships, the credentials a build can access, or the environments affected by a release.
+- The new reference adds high-signal heuristics without bloating the main workflow with supply-chain-specific detail.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- mode-and-configuration matrix review
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.6.0 — 2026-09-12
 
 Focused improvement: make configuration-, feature-flag-, role-, tenant-, version-, and deployment-dependent behavior explicit during review.
