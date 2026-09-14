@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.7.1
+version: 0.8.0
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -26,6 +26,7 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 2. Build a change map.
    - Identify changed components, callers, dependencies, data flows, state transitions, and boundaries.
    - Follow important inputs to side effects and outputs to consumers.
+   - Classify each change's shape: additive, semantic change, deletion, refactor, dependency/configuration, or cross-cutting. Shape drives depth — a deletion or a changed default carries more risk than an addition, even at equal diff size.
 3. Build a risk map before deep reading.
    - Mark each changed surface by **reach** (local, service-wide, cross-service, user-visible, data-wide) and **failure cost** (recoverable, disruptive, irreversible).
    - Spend the deepest review effort on high-reach or hard-to-recover changes: auth, money/entitlements, persistence, migrations, queues, caches, public contracts, CI/deploy, and shared libraries.

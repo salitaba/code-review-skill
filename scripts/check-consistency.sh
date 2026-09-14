@@ -2,10 +2,10 @@
 # Consistency checks for this skill repository.
 #
 # 1. Reference wiring — every references/*.md must be loadable from SKILL.md
-#    (a trigger exists) or be declared REDUNDANT below. A reference that
-#    SKILL.md never loads is invisible to the agent, so the repository claims
-#    review coverage the skill will not apply. This gap appeared in 0.5.0
-#    (review-decision-record) and recurred in 0.7.0 (dependency-and-delivery).
+#    (a trigger exists). A reference that SKILL.md never loads is invisible to
+#    the agent, so the repository claims review coverage the skill will not
+#    apply. This gap appeared in 0.5.0 (review-decision-record) and recurred in
+#    0.7.0 (dependency-and-delivery).
 #
 # 2. Version agreement — the version stated by SKILL.md, .claude-plugin/
 #    plugin.json, and the newest changelog entry must match. Drift happened at
@@ -22,13 +22,6 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-# Reference files intentionally NOT loaded during the review workflow.
-# Add an entry only after confirming SKILL.md already carries the content.
-REDUNDANT=$(cat <<'EOF'
-references/review-triage-and-evidence.md
-EOF
-)
-
 status=0
 
 fail() {
@@ -42,10 +35,7 @@ for file in references/*.md; do
   if grep -qF "$file" SKILL.md; then
     continue
   fi
-  if printf '%s\n' "$REDUNDANT" | grep -qxF "$file"; then
-    continue
-  fi
-  fail "unwired reference: $file (add a load trigger in SKILL.md, or declare it REDUNDANT in $0)"
+  fail "unwired reference: $file (add a load trigger in SKILL.md, or delete the reference)"
 done
 
 # --- 2. version agreement --------------------------------------------------

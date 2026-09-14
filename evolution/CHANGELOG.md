@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.8.0 — 2026-09-14
+
+Focused improvement: make the eval suite test restraint as well as recall, and remove the last reference that no workflow step loads.
+
+Added:
+- `evals/no-material-findings/` — a case whose correct outcome is approval; it grades the absence of manufactured findings rather than the presence of a defect, and is the only shape of case that can distinguish a disciplined reviewer from an eager one
+- a `must-not-flag-credential-exposure` grader on the CI case, restoring the precision coverage lost when an invalid decoy was removed
+- a change-shape classification in step 2, covering additive, semantic, deletion, refactor, dependency/configuration, and cross-cutting changes
+
+Removed:
+- `references/review-triage-and-evidence.md` — its evidence ladder and finding gate were already in `SKILL.md`, and its triage section was the only distinct part; that part is now the step 2 change-shape line. With no exemptions remaining, `scripts/check-consistency.sh` no longer carries a REDUNDANT allowlist, so the wiring rule is now absolute.
+
+Why:
+- The first eval run reported `meanDelta: 0`: the no-plugin arm solved every case, so the suite could not distinguish the skill from no skill. Cases that only reward finding defects cannot measure a skill whose distinguishing claim is knowing when not to report one.
+- A decoy that graded a correct finding as a false positive demonstrated that fixture semantics, not author intent, decide whether a grader is valid.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- mode-and-configuration matrix review
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.7.1 — 2026-09-14
 
 Focused improvement: close the reference-integration gap and make reference wiring checkable.

@@ -30,11 +30,10 @@ The skill is evolved iteratively. Improvements must be justified by a concrete b
 - `references/` — deeper review heuristics, loaded by `SKILL.md` when a trigger applies
 - `references/dependency-and-delivery-review.md` — dependency, build, CI/CD, container, infrastructure, and release review
 - `references/review-decision-record.md` — decision boundary, assumptions, evidence, residual risk, and review limits
-- `references/review-triage-and-evidence.md` — standalone; its triage, evidence-ladder, and finding-gate content is already incorporated into `SKILL.md`, so the workflow does not load it
 - `evolution/` — change history and decisions
 - `evals/` — adversarial review cases; run with `claude plugin eval .`, validated with `claude plugin validate .`
 - `.claude-plugin/plugin.json` — plugin manifest, enabling plugin install and first-party eval
-- `scripts/check-consistency.sh` — fails when a reference is neither loadable by `SKILL.md` nor declared redundant, or when the declared version disagrees between `SKILL.md`, `.claude-plugin/plugin.json`, and the changelog
+- `scripts/check-consistency.sh` — fails when a reference is not loadable by `SKILL.md`, when the version disagrees between `SKILL.md`, `.claude-plugin/plugin.json`, and the changelog, or when a grader name breaks the prefix contract
 
 ## Current improvement
 

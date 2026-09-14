@@ -1,6 +1,6 @@
 {
   "name": "code-review",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Evidence-driven code review skill: find defects that change behavior, with severity calibrated to evidence.",
   "author": {
     "name": "Ali Tabatabaei"

@@ -51,6 +51,12 @@ skill makes: that severity must not exceed evidence, that a concern should be
 dropped when falsifying evidence is already present, and that a removed
 safeguard must be checked for relocation rather than assumed lost.
 
+A case may also be **precision-only**, with no `must-find` grader at all. Some
+changes are genuinely clean and the correct review is approval, and that is the
+only shape of case that can test whether a reviewer manufactures findings to look
+thorough. The reducer prints `n/a` for a recall column with no graders rather
+than a misleading zero.
+
 ## Fixture validity
 
 A decoy is a claim about the code, so it must be true of the code as written —
