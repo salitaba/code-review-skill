@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.8.0
+version: 0.8.1
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 

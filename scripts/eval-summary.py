@@ -117,13 +117,23 @@ def main() -> int:
                   f"{pct(rec):>7} {pct(fpr):>8} {pct(cal):>7}")
         with_score, without_score = arm_score(case, "with"), arm_score(case, "without")
         if with_score is not None and without_score is not None:
-            lifts.append(with_score - without_score)
+            lifts.append((name, with_score - without_score))
             print(f"{'':<28} {'lift':<8} {with_score - without_score:+.2f}")
         print()
 
     if lifts:
-        print(f"mean lift over {len(lifts)} case(s): {sum(lifts) / len(lifts):+.3f}")
+        mean = sum(l for _, l in lifts) / len(lifts)
+        print(f"mean lift over {len(lifts)} case(s): {mean:+.3f}")
+        flat = [n for n, l in lifts if l <= 0]
+        if flat:
+            print()
+            print(f"NON-DISCRIMINATING: {len(flat)} of {len(lifts)} case(s) scored no better")
+            print("with the skill than without it, so they cannot measure it. Either the")
+            print("fixture is too easy or the grader is too permissive:")
+            for n in flat:
+                print(f"  {n}")
         if len(lifts) < FEW_CASES:
+            print()
             print(f"  caution: fewer than {FEW_CASES} cases — a smoke result, not a benchmark")
     print("note: fp-rate is the share of must-not-flag graders that FAILED in that arm")
     if unknown:

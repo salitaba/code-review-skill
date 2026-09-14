@@ -1,6 +1,6 @@
 # Code Review Agent Skill
 
-[![skills.sh](https://skills.sh/b/salitaba/code-review-skill)](https://skills.sh/salitaba/code-review-skill/code-review)
+[![skills.sh](https://skills.sh/b/salitaba/code-review-skill)](https://skills.sh/salitaba/code-review-skill)
 
 A living, evidence-driven skill for high-signal code review.
 
@@ -12,9 +12,7 @@ Install directly with the skills CLI:
 npx skills add https://github.com/salitaba/code-review-skill --skill code-review
 ```
 
-The `--skill code-review` selector is supported by the skills CLI. The repository contains a root-level `SKILL.md`, which is a supported discovery location.
-
-After installation, the skill is available to supported coding agents through the standard Agent Skills workflow. skills.sh indexes GitHub-hosted skills automatically when they are discovered/installed.
+The `--skill code-review` selector is supported by the skills CLI. After installation the skill is available to supported coding agents through the standard Agent Skills workflow.
 
 ## Goal
 
@@ -37,12 +35,17 @@ The skill is evolved iteratively. Improvements must be justified by a concrete b
 
 ## Current improvement
 
-The latest iteration wires the dependency and delivery reference into the review workflow and makes reference wiring checkable, so a reference that `SKILL.md` never loads fails the check instead of silently claiming review coverage the agent will not apply.
+The latest iteration makes the eval suite refuse to overstate itself. The reducer now reports when a case scores no better with the skill than without it, rather than averaging that away into a lift figure, and the restraint case no longer carries a grader that penalised a well-calibrated `Minor` finding for being reported at all.
 
 ## skills.sh
 
-The public skill page is:
+The badge above uses the format skills.sh documents —
+`https://skills.sh/b/owner/repo`, linking to `https://skills.sh/owner/repo`.
+It renders an install count, which skills.sh derives from anonymous telemetry
+collected by its own CLI.
 
-`https://www.skills.sh/salitaba/code-review-skill/code-review`
-
-The page becomes available after skills.sh indexes the repository; the GitHub repository itself remains the canonical source.
+That count is empty for this repository, so the badge currently resolves to
+`resource not found`. Nothing in the repository can change this: the badge
+reports data skills.sh has, and it acquires data by being installed through the
+skills CLI. Until this repository is installed that way, treat the badge as a
+placeholder and the GitHub repository as the canonical source.
