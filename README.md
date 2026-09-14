@@ -27,13 +27,18 @@ The skill is evolved iteratively. Improvements must be justified by a concrete b
 ## Canonical artifact
 
 - `SKILL.md` — agent-facing skill
-- `references/` — deeper review heuristics
-- `references/review-triage-and-evidence.md` — risk-based review depth and evidence calibration
+- `references/` — deeper review heuristics, loaded by `SKILL.md` when a trigger applies
+- `references/dependency-and-delivery-review.md` — dependency, build, CI/CD, container, infrastructure, and release review
+- `references/review-decision-record.md` — decision boundary, assumptions, evidence, residual risk, and review limits
+- `references/review-triage-and-evidence.md` — standalone; its triage, evidence-ladder, and finding-gate content is already incorporated into `SKILL.md`, so the workflow does not load it
 - `evolution/` — change history and decisions
+- `evals/` — adversarial review cases; run with `claude plugin eval .`, validated with `claude plugin validate .`
+- `.claude-plugin/plugin.json` — plugin manifest, enabling plugin install and first-party eval
+- `scripts/check-consistency.sh` — fails when a reference is neither loadable by `SKILL.md` nor declared redundant, or when the declared version disagrees between `SKILL.md`, `.claude-plugin/plugin.json`, and the changelog
 
 ## Current improvement
 
-The latest iteration adds rollout/migration safety, before-versus-after behavior comparison, and a stronger evidence ladder so the reviewer spends deep effort on trust, state, ownership, compatibility, and failure boundaries, while downgrading weakly evidenced concerns to focused questions instead of overstated blockers.
+The latest iteration wires the dependency and delivery reference into the review workflow and makes reference wiring checkable, so a reference that `SKILL.md` never loads fails the check instead of silently claiming review coverage the agent will not apply.
 
 ## skills.sh
 

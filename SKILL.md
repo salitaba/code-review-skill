@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.6.0
+version: 0.7.1
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -30,6 +30,7 @@ A change can alter behavior through callers, downstream consumers, transaction/r
    - Mark each changed surface by **reach** (local, service-wide, cross-service, user-visible, data-wide) and **failure cost** (recoverable, disruptive, irreversible).
    - Spend the deepest review effort on high-reach or hard-to-recover changes: auth, money/entitlements, persistence, migrations, queues, caches, public contracts, CI/deploy, and shared libraries.
    - Treat a small diff in a high-reach surface as higher risk than a large mechanical diff in a local surface.
+   - When the change touches the delivery chain, apply the dependency-and-delivery trigger under Reference loading.
 4. Build an invariant ledger.
    - Write down the key preconditions, postconditions, ownership rules, uniqueness constraints, authorization rules, and state-transition rules that must remain true.
    - For each changed path, mark which invariant it establishes, preserves, weakens, or silently bypasses.
@@ -80,6 +81,16 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 17. Record the review decision.
    - Before producing the final review, use `references/review-decision-record.md` to make the decision boundary, high-risk assumptions, evidence, residual risk, and review limits explicit.
    - Do not use `approve` as a synonym for “the diff looks reasonable”; use it only when the reviewed scope and evidence support that conclusion.
+
+## Reference loading
+
+Load a reference only when its trigger applies. Do not load references for small local changes.
+
+- `references/dependency-and-delivery-review.md` — load before reviewing when the change touches dependencies, lockfiles, build tooling, CI/CD workflows, containers, images, infrastructure, packaging, or release automation.
+  - A dependency or workflow edit can change the shipped artifact, the credentials a build can reach, or which environments a release affects. Review it as a delivery-chain change, not as a generic configuration change.
+- `references/review-decision-record.md` — load before producing the final review (step 17).
+
+Reference contents are not a checklist. When a trigger applies, read the reference before forming findings for that surface.
 
 ## Finding standard
 

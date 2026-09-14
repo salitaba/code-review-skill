@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.7.1 — 2026-09-14
+
+Focused improvement: close the reference-integration gap and make reference wiring checkable.
+
+Fixed:
+- synchronized the `SKILL.md` version with the latest documented evolution (`0.6.0` → `0.7.1`)
+- connected `references/dependency-and-delivery-review.md` to the main workflow with an explicit trigger; 0.7.0 added the reference without any workflow step that loads it
+- consolidated load conditions into a single `Reference loading` section instead of leaving them implied by prose
+- corrected the stale README reference list and the obsolete "Current improvement" summary
+- added the missing plugin manifest, so `claude plugin validate` passes; validation previously failed with no manifest in the directory
+
+Added:
+- `.claude-plugin/plugin.json` — makes `claude plugin validate` pass and the repository installable as a plugin alongside `npx skills add`
+- `scripts/check-consistency.sh` — fails when a file in `references/` is neither loadable by `SKILL.md` nor declared redundant, or when the declared version disagrees between `SKILL.md`, `.claude-plugin/plugin.json`, and the changelog
+- `evals/` — two adversarial review cases with judge-scored graders, and `scripts/eval-summary.py`, which reduces a run to recall, false-positive rate, and lift against the harness's no-plugin baseline arm
+
+Why:
+- The same integration gap occurred in 0.5.0 (`review-decision-record.md`) and recurred in 0.7.0 (`dependency-and-delivery-review.md`). Fixing only the second instance would leave the mechanism unfixed.
+- A reference that exists but is never loaded is worse than no reference: the repository claims coverage the agent will not apply.
+- The check converts a documentation convention into an enforced one, which is what 0.5.1 lacked.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- mode-and-configuration matrix review
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.7.0 — 2026-09-13
 
 Focused improvement: make dependency, build, CI/CD, packaging, container, infrastructure, and release changes first-class review surfaces.
