@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.8.1
+version: 0.9.1
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -52,34 +52,37 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 8. Check concurrency and lifecycle.
    - Shared mutable state, races, lost updates, locking, transaction scope, isolation, async execution, duplicate delivery, retries, timeouts, cancellation, TTL/lease expiry, and resource ownership.
    - Ask whether a second actor, delayed message, retry, timeout, or restart can interleave between the check and the side effect.
-9. Check contracts and integration boundaries.
+9. Check temporal correctness when the change touches time, scheduling, expiry, delayed work, leases, retries, event ordering, timestamps, or clock-dependent behavior.
+   - Load `references/temporal-correctness-review.md` before forming findings for that surface.
+   - Treat occurrence time, processing time, expiry time, and last-observed time as different semantics unless proven otherwise.
+10. Check contracts and integration boundaries.
    - API compatibility, serialization, schema evolution, event contracts, versioning, authentication/authorization, tenant isolation, and backward/forward compatibility.
    - Inspect both producers and consumers; a locally valid change can still violate a downstream assumption.
-10. Check rollout, migration, and recovery safety.
+11. Check rollout, migration, and recovery safety.
    - Consider mixed-version deployments, feature flags, retries during rollout, backward-compatible database changes, expand/contract sequencing, rollback feasibility, and recovery after partial deployment.
    - A change is not operationally safe merely because the steady-state code path is correct.
-11. Check architecture and abstraction boundaries.
+12. Check architecture and abstraction boundaries.
    - Dependency direction, ownership, coupling, hidden policy, lifecycle leakage, duplicated orchestration, and abstractions that permit type-correct but semantically invalid use.
-12. Check security, performance, and operability when relevant.
+13. Check security, performance, and operability when relevant.
    - Trust boundaries, input handling, secrets, privilege, injection, denial-of-service risks, query amplification, hot paths, resource growth, metrics/logging/tracing, recovery, and alertability.
    - Verify that important failures remain distinguishable in telemetry; collapsed errors can make a defect operationally invisible.
-13. Check negative space and deleted safeguards.
+14. Check negative space and deleted safeguards.
    - Inspect removed validation, authorization, rate limits, tests, metrics, alerts, timeouts, cleanup, retries, and rollback hooks.
    - Ask what protection used to exist, where it moved, and whether the new path still has equivalent coverage.
-14. Check tests.
+15. Check tests.
    - Prefer tests that prove observable behavior and invariants.
    - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, and assertions that merely verify mocks/interactions.
    - Confirm new tests would fail on the suspected regression; a test that passes both before and after the change is not a regression test.
    - For flag/config-heavy changes, ensure tests cover the high-risk matrix cells rather than only the default configuration.
-15. Validate findings.
+16. Validate findings.
    - For every candidate issue, identify the smallest trigger and trace the affected behavior.
    - Try to falsify it with a concrete counterexample.
    - Prefer a reproducer, failing test, executable query, or precise code-path proof over intuition.
-16. Self-critique and stop.
+17. Self-critique and stop.
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
-17. Record the review decision.
+18. Record the review decision.
    - Before producing the final review, use `references/review-decision-record.md` to make the decision boundary, high-risk assumptions, evidence, residual risk, and review limits explicit.
    - Do not use `approve` as a synonym for “the diff looks reasonable”; use it only when the reviewed scope and evidence support that conclusion.
 
@@ -89,7 +92,9 @@ Load a reference only when its trigger applies. Do not load references for small
 
 - `references/dependency-and-delivery-review.md` — load before reviewing when the change touches dependencies, lockfiles, build tooling, CI/CD workflows, containers, images, infrastructure, packaging, or release automation.
   - A dependency or workflow edit can change the shipped artifact, the credentials a build can reach, or which environments a release affects. Review it as a delivery-chain change, not as a generic configuration change.
-- `references/review-decision-record.md` — load before producing the final review (step 17).
+- `references/temporal-correctness-review.md` — load before reviewing when the change touches time, expiry, scheduling, delayed work, leases, retries, event ordering, timestamps, or clock-dependent behavior.
+  - A path can be value-correct at one instant and still be wrong after restart, clock adjustment, late delivery, duplicate execution, or lease expiry.
+- `references/review-decision-record.md` — load before producing the final review (step 18).
 
 Reference contents are not a checklist. When a trigger applies, read the reference before forming findings for that surface.
 
@@ -184,6 +189,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - invariants enforced in one path but bypassed in another
 - tests that do not distinguish the old bug from the fixed behavior
 - semantic changes that occur only for non-default flags, roles, tenants, or versions
+- time-dependent behavior that changes at exact boundaries, after restart, or under late delivery
 
 ### Concurrency
 - check-then-act races
@@ -194,6 +200,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - TTL/lease expiry during work
 - async work outliving request/transaction context
 - restart/recovery paths that replay or lose in-flight work
+- timeout responses that race with eventual success and create conflicting follow-up work
 
 ### API/contracts
 - breaking changes hidden behind compatible types
@@ -204,6 +211,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - authentication/authorization behavior changes
 - downstream consumers that infer meaning from ordering, omission, or error codes
 - version/flag combinations that make the same payload mean different things
+- timestamp precision, timezone, and expiry semantics that change across boundaries
 
 ### Security
 - trust-boundary changes
@@ -226,6 +234,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - observability gaps that make failures unrecoverable
 - error collapsing that prevents safe retry, alerting, or diagnosis
 - configuration or rollout combinations that multiply load unexpectedly
+- catch-up storms after downtime or restart
 
 ### Testing
 - happy-path-only coverage
@@ -236,6 +245,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - fixtures that omit the boundary condition needed to trigger the bug
 - tests that cannot fail independently when the behavior regresses
 - default-only tests for non-default flags, versions, roles, or tenant states
+- real-time sleeps used where deterministic clock advancement and explicit event ordering are possible
 
 ## AI-generated-code checks
 
