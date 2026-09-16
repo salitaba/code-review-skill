@@ -6,13 +6,19 @@ A living, evidence-driven skill for high-signal code review.
 
 ## Install
 
-Install directly with the skills CLI:
+Install with the skills CLI:
+
+```bash
+npx skills add salitaba/code-review-skill
+```
+
+`owner/repo` is the form the skills.sh documentation uses. This repository publishes one skill, `code-review`, at the repository root. The explicit equivalent, which selects that skill by name, is:
 
 ```bash
 npx skills add https://github.com/salitaba/code-review-skill --skill code-review
 ```
 
-The `--skill code-review` selector is supported by the skills CLI. After installation the skill is available to supported coding agents through the standard Agent Skills workflow.
+After installation the skill is available to supported coding agents through the standard Agent Skills workflow.
 
 ## Goal
 
@@ -39,13 +45,16 @@ The latest iteration makes the eval suite refuse to overstate itself. The reduce
 
 ## skills.sh
 
-The badge above uses the format skills.sh documents —
+The badge above uses the format skills.sh serves —
 `https://skills.sh/b/owner/repo`, linking to `https://skills.sh/owner/repo`.
-It renders an install count, which skills.sh derives from anonymous telemetry
-collected by its own CLI.
+It renders the number of skills skills.sh has indexed for the repository, not an
+install count: an indexed repository renders `Skills: 1`, an unindexed one
+renders `resource not found`. There is no per-skill badge; `/b/owner/repo/skill`
+renders `invalid`.
 
-That count is empty for this repository, so the badge currently resolves to
-`resource not found`. Nothing in the repository can change this: the badge
-reports data skills.sh has, and it acquires data by being installed through the
-skills CLI. Until this repository is installed that way, treat the badge as a
-placeholder and the GitHub repository as the canonical source.
+This repository has no skills.sh index entry yet, so the badge renders
+`resource not found` and the link 404s. The repository layout is not the cause —
+a skill defined by a root `SKILL.md` is indexed once an entry exists. skills.sh
+creates the entry from the anonymous telemetry its CLI reports, so the entry
+appears after the skill is first installed through that CLI. Until then, treat
+the badge as a placeholder and this GitHub repository as the canonical source.
