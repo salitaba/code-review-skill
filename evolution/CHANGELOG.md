@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.0 — 2026-09-17
+
+Focused improvement: add a dedicated data-lifecycle and privacy review surface.
+
+Added:
+- `references/data-lifecycle-and-privacy-review.md`
+- data-flow and trust-boundary tracing for collected, copied, derived, logged, cached, indexed, exported, and deleted data
+- purpose limitation and minimization checks
+- tenant/user/role/region isolation checks across joins, caches, indexes, replays, and batch jobs
+- retention, TTL, deletion propagation, restore, replay, and backfill heuristics
+- inference and re-identification checks for joined or derived data
+- tests for redaction, unauthorized access, deletion propagation, and resurrection through retry/restore paths
+
+Why:
+- Previous versions covered security, contracts, rollout, observability, and temporal behavior, but data lifecycle risks were still scattered across those categories.
+- Privacy and confidentiality failures often come from secondary copies and derived paths—logs, traces, caches, search indexes, dead-letter queues, exports, backups, and replays—rather than the primary request path.
+- A focused reference improves review depth without turning the core skill into another exhaustive checklist.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- mode-and-configuration matrix review
+- temporal-correctness review
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 0.9.1 — 2026-09-16
 
 Focused improvement: close the temporal-reference integration gap and synchronize the executable skill and plugin metadata.
@@ -43,52 +77,3 @@ Added:
 Why:
 - Previous versions mentioned TTLs, leases, retries, and delayed work, but those checks were scattered across concurrency and reliability guidance.
 - Temporal defects often appear only at exact boundaries, after restart, under clock adjustment, or when delayed work arrives.
-
-Kept:
-- explicit review-decision states
-- risk-based review depth
-- invariant-ledger reasoning
-- mode-and-configuration matrix review
-- boundary-focused counterexamples
-- producer-and-consumer contract checks
-- regression-test validity checks
-- rollout/migration/recovery heuristics
-- evidence and confidence requirements
-- abstraction-leak checks
-- negative-space and deleted-safeguard review
-- counterexample/falsification before major findings
-- self-critique and stopping rule
-
-## 0.8.1 — 2026-09-14
-
-Focused improvement: report when a fixture cannot measure the skill, and correct a grader that rewarded silence.
-
-Added:
-- a `NON-DISCRIMINATING` report in `scripts/eval-summary.py`: when a case scores no better with the skill than without it, the reducer says so and names the case, instead of printing a mean lift that reads as a result
-- `evals/no-material-findings/graders/calibration-pii-severity.md` — grades whether the response describes the added log line in terms the fixture supports
-
-Fixed:
-- the README badge link now points at `https://skills.sh/owner/repo`, the target the skills.sh documentation pairs with the badge image; the previous link carried a `/code-review` segment that returns a not-found page
-- replaced `must-not-flag-pii-exposure.md`, which failed a response that filed the log line as `Minor`, acknowledged the pre-existing `BillingService` occurrence, and declined to escalate. It forbade reporting the line as a new exposure at all, so it penalised the calibrated review and rewarded omitting the item — a precision grader inverted into an incentive against thoroughness.
-
-Removed:
-- the unverified claim that a root-level `SKILL.md` is a location skills.sh discovers. The documentation states the badge shows an install count derived from the CLI's telemetry and does not state a repository layout requirement, so the README no longer asserts one.
-
-Why:
-- The third eval run reported `mean lift -0.083`. Reading the failed graders showed the cause was this repository's grader, not the skill: the case scored lower with the skill only because the skill did what it should. A suite whose precision graders penalise correct restraint cannot measure the restraint it was built beside.
-- The badge resolved to `resource not found` because skills.sh holds no install data for this repository. Only the link target was wrong in the repository; the missing count is upstream and is now documented rather than implied to be fixed.
-
-Kept:
-- explicit review-decision states
-- risk-based review depth
-- invariant-ledger reasoning
-- mode-and-configuration matrix review
-- boundary-focused counterexamples
-- producer-and-consumer contract checks
-- regression-test validity checks
-- rollout/migration/recovery heuristics
-- evidence and confidence requirements
-- abstraction-leak checks
-- negative-space and deleted-safeguard review
-- counterexample/falsification before major findings
-- self-critique and stopping rule
