@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.0.1 — 2026-09-18
+
+Focused improvement: wire the data-lifecycle and privacy playbook into the executable review workflow.
+
+Fixed:
+- synchronized `SKILL.md` to version `1.0.1`
+- added an explicit data-lifecycle/privacy review step
+- added the new reference trigger to `Reference loading`
+- added data-copy, deletion, redaction, replay, restore, and derived-data checks to the high-value review guidance
+
+Why:
+- Version 1.0.0 added `references/data-lifecycle-and-privacy-review.md`, but `SKILL.md` remained at 0.9.1 and did not require the agent to load the reference.
+- The repository therefore documented a useful privacy/data-lifecycle capability that the executable workflow could silently skip.
+- This change fixes the integration mechanism rather than adding another disconnected checklist.
+
+Kept:
+- explicit review-decision states
+- risk-based review depth
+- invariant-ledger reasoning
+- mode-and-configuration matrix review
+- temporal-correctness review
+- data-lifecycle and privacy review
+- boundary-focused counterexamples
+- producer-and-consumer contract checks
+- regression-test validity checks
+- rollout/migration/recovery heuristics
+- evidence and confidence requirements
+- abstraction-leak checks
+- negative-space and deleted-safeguard review
+- counterexample/falsification before major findings
+- self-critique and stopping rule
+
 ## 1.0.0 — 2026-09-17
 
 Focused improvement: add a dedicated data-lifecycle and privacy review surface.
