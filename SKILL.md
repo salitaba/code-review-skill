@@ -1,6 +1,6 @@
 ---
 name: code-review
-version: 0.9.1
+version: 1.0.1
 description: Perform high-signal code reviews for correctness, security, concurrency, reliability, architecture, maintainability, testing, API contracts, performance, and product/domain risks. Use when reviewing a pull request, diff, patch, commit, or code change; prioritize user/system impact over style and require evidence before reporting findings.
 ---
 
@@ -16,7 +16,7 @@ Optimize for **signal over coverage**. Do not manufacture findings to make the r
 
 Review **changed behavior, not merely changed lines**.
 
-A change can alter behavior through callers, downstream consumers, transaction/retry boundaries, persistence, schemas/migrations, events, caches, authorization, observability, configuration, external APIs, or domain invariants even when those files are unchanged.
+A change can alter behavior through callers, downstream consumers, transaction/retry boundaries, persistence, schemas/migrations, events, caches, authorization, observability, configuration, external APIs, data lifecycle, or domain invariants even when those files are unchanged.
 
 ## Review workflow
 
@@ -29,7 +29,7 @@ A change can alter behavior through callers, downstream consumers, transaction/r
    - Classify each change's shape: additive, semantic change, deletion, refactor, dependency/configuration, or cross-cutting. Shape drives depth — a deletion or a changed default carries more risk than an addition, even at equal diff size.
 3. Build a risk map before deep reading.
    - Mark each changed surface by **reach** (local, service-wide, cross-service, user-visible, data-wide) and **failure cost** (recoverable, disruptive, irreversible).
-   - Spend the deepest review effort on high-reach or hard-to-recover changes: auth, money/entitlements, persistence, migrations, queues, caches, public contracts, CI/deploy, and shared libraries.
+   - Spend the deepest review effort on high-reach or hard-to-recover changes: auth, money/entitlements, persistence, migrations, queues, caches, public contracts, CI/deploy, shared libraries, and sensitive-data paths.
    - Treat a small diff in a high-reach surface as higher risk than a large mechanical diff in a local surface.
    - When the change touches the delivery chain, apply the dependency-and-delivery trigger under Reference loading.
 4. Build an invariant ledger.
@@ -55,34 +55,37 @@ A change can alter behavior through callers, downstream consumers, transaction/r
 9. Check temporal correctness when the change touches time, scheduling, expiry, delayed work, leases, retries, event ordering, timestamps, or clock-dependent behavior.
    - Load `references/temporal-correctness-review.md` before forming findings for that surface.
    - Treat occurrence time, processing time, expiry time, and last-observed time as different semantics unless proven otherwise.
-10. Check contracts and integration boundaries.
+10. Check data lifecycle and privacy when the change collects, stores, derives, logs, caches, exports, indexes, deletes, or re-identifies sensitive data.
+   - Load `references/data-lifecycle-and-privacy-review.md` before forming findings for that surface.
+   - Trace primary and secondary copies, purpose, access scope, retention, deletion propagation, replay/restore behavior, and derived-data classification.
+11. Check contracts and integration boundaries.
    - API compatibility, serialization, schema evolution, event contracts, versioning, authentication/authorization, tenant isolation, and backward/forward compatibility.
    - Inspect both producers and consumers; a locally valid change can still violate a downstream assumption.
-11. Check rollout, migration, and recovery safety.
+12. Check rollout, migration, and recovery safety.
    - Consider mixed-version deployments, feature flags, retries during rollout, backward-compatible database changes, expand/contract sequencing, rollback feasibility, and recovery after partial deployment.
    - A change is not operationally safe merely because the steady-state code path is correct.
-12. Check architecture and abstraction boundaries.
+13. Check architecture and abstraction boundaries.
    - Dependency direction, ownership, coupling, hidden policy, lifecycle leakage, duplicated orchestration, and abstractions that permit type-correct but semantically invalid use.
-13. Check security, performance, and operability when relevant.
+14. Check security, performance, and operability when relevant.
    - Trust boundaries, input handling, secrets, privilege, injection, denial-of-service risks, query amplification, hot paths, resource growth, metrics/logging/tracing, recovery, and alertability.
    - Verify that important failures remain distinguishable in telemetry; collapsed errors can make a defect operationally invisible.
-14. Check negative space and deleted safeguards.
+15. Check negative space and deleted safeguards.
    - Inspect removed validation, authorization, rate limits, tests, metrics, alerts, timeouts, cleanup, retries, and rollback hooks.
    - Ask what protection used to exist, where it moved, and whether the new path still has equivalent coverage.
-15. Check tests.
+16. Check tests.
    - Prefer tests that prove observable behavior and invariants.
-   - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, and assertions that merely verify mocks/interactions.
+   - Look for missing negative paths, concurrency/retry cases, contract tests, migration coverage, rollout/rollback coverage, deletion/redaction coverage, and assertions that merely verify mocks/interactions.
    - Confirm new tests would fail on the suspected regression; a test that passes both before and after the change is not a regression test.
    - For flag/config-heavy changes, ensure tests cover the high-risk matrix cells rather than only the default configuration.
-16. Validate findings.
+17. Validate findings.
    - For every candidate issue, identify the smallest trigger and trace the affected behavior.
    - Try to falsify it with a concrete counterexample.
    - Prefer a reproducer, failing test, executable query, or precise code-path proof over intuition.
-17. Self-critique and stop.
+18. Self-critique and stop.
    - Remove duplicates and style-only comments.
    - Downgrade unsupported certainty.
    - Stop when meaningful coverage is complete; do not keep searching solely to increase finding count.
-18. Record the review decision.
+19. Record the review decision.
    - Before producing the final review, use `references/review-decision-record.md` to make the decision boundary, high-risk assumptions, evidence, residual risk, and review limits explicit.
    - Do not use `approve` as a synonym for “the diff looks reasonable”; use it only when the reviewed scope and evidence support that conclusion.
 
@@ -94,7 +97,9 @@ Load a reference only when its trigger applies. Do not load references for small
   - A dependency or workflow edit can change the shipped artifact, the credentials a build can reach, or which environments a release affects. Review it as a delivery-chain change, not as a generic configuration change.
 - `references/temporal-correctness-review.md` — load before reviewing when the change touches time, expiry, scheduling, delayed work, leases, retries, event ordering, timestamps, or clock-dependent behavior.
   - A path can be value-correct at one instant and still be wrong after restart, clock adjustment, late delivery, duplicate execution, or lease expiry.
-- `references/review-decision-record.md` — load before producing the final review (step 18).
+- `references/data-lifecycle-and-privacy-review.md` — load before reviewing when the change touches personal, confidential, financial, health, tenant, or security-sensitive data, or any path that logs, caches, indexes, exports, replays, backs up, deletes, or derives such data.
+  - Secondary copies and derived paths can violate confidentiality, retention, isolation, or deletion guarantees even when the primary request path looks correct.
+- `references/review-decision-record.md` — load before producing the final review (step 19).
 
 Reference contents are not a checklist. When a trigger applies, read the reference before forming findings for that surface.
 
@@ -190,6 +195,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - tests that do not distinguish the old bug from the fixed behavior
 - semantic changes that occur only for non-default flags, roles, tenants, or versions
 - time-dependent behavior that changes at exact boundaries, after restart, or under late delivery
+- data lifecycle changes that leave sensitive copies outside the intended retention or deletion boundary
 
 ### Concurrency
 - check-then-act races
@@ -201,6 +207,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - async work outliving request/transaction context
 - restart/recovery paths that replay or lose in-flight work
 - timeout responses that race with eventual success and create conflicting follow-up work
+- deletion, redaction, or access changes racing with replay, restore, indexing, or cache refresh
 
 ### API/contracts
 - breaking changes hidden behind compatible types
@@ -212,6 +219,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - downstream consumers that infer meaning from ordering, omission, or error codes
 - version/flag combinations that make the same payload mean different things
 - timestamp precision, timezone, and expiry semantics that change across boundaries
+- data classification, deletion, or redaction promises that are not preserved by downstream consumers
 
 ### Security
 - trust-boundary changes
@@ -223,6 +231,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - resource-exhaustion paths
 - fail-open behavior after timeout, cache miss, or dependency failure
 - feature/config paths that bypass controls only for specific roles, tenants, or rollout cohorts
+- sensitive data copied into cache keys, URLs, filenames, labels, traces, exports, or dead-letter payloads
 
 ### Performance/reliability
 - N+1 and accidental fan-out
@@ -235,6 +244,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - error collapsing that prevents safe retry, alerting, or diagnosis
 - configuration or rollout combinations that multiply load unexpectedly
 - catch-up storms after downtime or restart
+- secondary data copies that create unbounded retention, indexing, or replay costs
 
 ### Testing
 - happy-path-only coverage
@@ -246,6 +256,7 @@ Pay special attention when a change affects persisted data, public contracts, or
 - tests that cannot fail independently when the behavior regresses
 - default-only tests for non-default flags, versions, roles, or tenant states
 - real-time sleeps used where deterministic clock advancement and explicit event ordering are possible
+- missing redaction, unauthorized-access, deletion-propagation, replay/restore, or derived-data classification tests
 
 ## AI-generated-code checks
 
