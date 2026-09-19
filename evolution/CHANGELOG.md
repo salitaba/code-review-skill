@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.1 — 2026-09-20
+
+Maintenance improvement: synchronize plugin metadata with the generated-artifact/codegen review playbook.
+
+Fixed:
+- updated `.claude-plugin/plugin.json` from `1.0.1` to `1.1.1`
+
+Why:
+- The repository already contains `references/generated-artifacts-and-codegen-review.md`, but version metadata lagged behind the documented `1.1.0` capability.
+- Keeping plugin metadata synchronized prevents agents and tooling from reporting an older skill version than the repository content actually provides.
+
+Known integration gap:
+- `SKILL.md` still needs an explicit generated-artifact/codegen trigger in its executable workflow. The next pass should wire that trigger and then synchronize the skill version as well.
+
 ## 1.1.0 — 2026-09-18
 
 Focused improvement: add a dedicated generated-artifact and code-generation review playbook.
@@ -15,7 +29,7 @@ Added:
 
 Why:
 - The existing skill covered APIs, schemas, delivery chains, and compatibility, but it did not make generator drift and source/generated mismatch a first-class review surface.
-- Small generator or template changes can affect many consumers and shipped artifacts, while stale generated output can make local and CI behavior disagree.
+- Small generator or template changes can affect many consumers and shipped artifacts, while stale generated output can make local tests pass while CI or production uses something else.
 - A focused reference improves review depth without adding another broad checklist to the core workflow.
 
 Integration note:
@@ -29,72 +43,6 @@ Kept:
 - temporal-correctness review
 - data-lifecycle and privacy review
 - dependency-and-delivery review
-- boundary-focused counterexamples
-- producer-and-consumer contract checks
-- regression-test validity checks
-- rollout/migration/recovery heuristics
-- evidence and confidence requirements
-- abstraction-leak checks
-- negative-space and deleted-safeguard review
-- counterexample/falsification before major findings
-- self-critique and stopping rule
-
-## 1.0.1 — 2026-09-18
-
-Focused improvement: wire the data-lifecycle and privacy playbook into the executable review workflow.
-
-Fixed:
-- synchronized `SKILL.md` to version `1.0.1`
-- added an explicit data-lifecycle/privacy review step
-- added the new reference trigger to `Reference loading`
-- added data-copy, deletion, redaction, replay, restore, and derived-data checks to the high-value review guidance
-
-Why:
-- Version 1.0.0 added `references/data-lifecycle-and-privacy-review.md`, but `SKILL.md` remained at 0.9.1 and did not require the agent to load the reference.
-- The repository therefore documented a useful privacy/data-lifecycle capability that the executable workflow could silently skip.
-- This change fixes the integration mechanism rather than adding another disconnected checklist.
-
-Kept:
-- explicit review-decision states
-- risk-based review depth
-- invariant-ledger reasoning
-- mode-and-configuration matrix review
-- temporal-correctness review
-- data-lifecycle and privacy review
-- boundary-focused counterexamples
-- producer-and-consumer contract checks
-- regression-test validity checks
-- rollout/migration/recovery heuristics
-- evidence and confidence requirements
-- abstraction-leak checks
-- negative-space and deleted-safeguard review
-- counterexample/falsification before major findings
-- self-critique and stopping rule
-
-## 1.0.0 — 2026-09-17
-
-Focused improvement: add a dedicated data-lifecycle and privacy review surface.
-
-Added:
-- `references/data-lifecycle-and-privacy-review.md`
-- data-flow and trust-boundary tracing for collected, copied, derived, logged, cached, indexed, exported, and deleted data
-- purpose limitation and minimization checks
-- tenant/user/role/region isolation checks across joins, caches, indexes, replays, and batch jobs
-- retention, TTL, deletion propagation, restore, replay, and backfill heuristics
-- inference and re-identification checks for joined or derived data
-- tests for redaction, unauthorized access, deletion propagation, and resurrection through retry/restore paths
-
-Why:
-- Previous versions covered security, contracts, rollout, observability, and temporal behavior, but data lifecycle risks were still scattered across those categories.
-- Privacy and confidentiality failures often come from secondary copies and derived paths—logs, traces, caches, search indexes, dead-letter queues, exports, backups, and replays—rather than the primary request path.
-- A focused reference improves review depth without turning the core skill into another exhaustive checklist.
-
-Kept:
-- explicit review-decision states
-- risk-based review depth
-- invariant-ledger reasoning
-- mode-and-configuration matrix review
-- temporal-correctness review
 - boundary-focused counterexamples
 - producer-and-consumer contract checks
 - regression-test validity checks
