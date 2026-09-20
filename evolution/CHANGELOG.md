@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.1.2 — 2026-09-21
+
+Focused improvement: strengthen generated-artifact review with artifact identity proof and semantic diff triage.
+
+Added to `references/generated-artifacts-and-codegen-review.md`:
+- exact source/toolchain/configuration/output identity checks
+- cache reuse and stale-output failure modes
+- proof that the tested artifact is the packaged/deployed artifact
+- semantic grouping of generated diffs to expose hidden wire, default, validation, auth, and resource changes
+- high-signal review questions and evidence requirements
+
+Why:
+- The existing playbook correctly identified source-of-truth drift and reproducibility risks, but it did not make artifact identity explicit enough.
+- “Generation succeeded” and “the build passed” are weaker claims than proving that the exact generated artifact under test is the one that ships.
+- Large generated diffs can hide one incompatible field, unsafe default, or authorization change; semantic triage improves review signal without expanding the core checklist.
+
+Known integration gap:
+- `SKILL.md` still needs an explicit generated-artifact/codegen trigger in its executable workflow. The playbook is stronger, but the next pass should wire the trigger and synchronize the skill version as well.
+
 ## 1.1.1 — 2026-09-20
 
 Maintenance improvement: synchronize plugin metadata with the generated-artifact/codegen review playbook.
